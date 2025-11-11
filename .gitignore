@@ -1,2 +1,3 @@
 pipewire/*
 __pycache__/*
+*.json
