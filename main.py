@@ -5,9 +5,13 @@ import time
 from pathlib import Path
 
 import rtmidi
+
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
-from pydbus import SessionBus
+
+import pulsectl
+
+from data import update_data
 
 ###############################################################################
 #
@@ -20,7 +24,16 @@ midi_event_queue = queue.Queue()
 
 mapping = {}
 
-bus = SessionBus()
+pulse = pulsectl.Pulse('MidiMixer')
+
+sinks_raw = pulse.sink_list()
+sink_inputs_raw = pulse.sink_input_list()
+sources_raw = pulse.source_list()
+source_outputs_raw = pulse.source_output_list()
+cards_raw = pulse.card_list()
+
+midi_in = rtmidi.MidiIn()
+in_ports_raw = midi_in.get_ports()
 
 ###############################################################################
 #
@@ -50,6 +63,7 @@ class ConfigHandler(FileSystemEventHandler):
         self.config_path = Path(config_path)
 
     def on_modified(self, event):
+        print("File modified")
         if Path(event.src_path) == self.config_path:
             load_config()
 
@@ -63,6 +77,7 @@ def load_config():
 #
 def main():
     """Startup"""
+    update_data()
 
 if __name__ == "__main__":
     main()
